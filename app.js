@@ -38,7 +38,6 @@ let selectedClassId = null;
 let selectedSectionId = null;
 let activeReasonStudent = null;
 
-// Prevent Firebase from loading the account before registration finishes.
 let isCreatingAccount = false;
 
 function loadAppData() {
@@ -61,10 +60,7 @@ function loadAppData() {
       };
     }
   } catch (error) {
-    console.warn(
-      "Could not read AttendEase data. Starting with an empty copy.",
-      error
-    );
+    console.warn("Could not read AttendEase data.", error);
   }
 
   return {
@@ -79,7 +75,6 @@ let cloudSaveQueue = Promise.resolve();
 
 function saveData() {
   try {
-    // Save a local backup.
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(appData)
@@ -87,7 +82,6 @@ function saveData() {
 
     const user = auth.currentUser;
 
-    // Do not save to Firebase if no teacher is signed in.
     if (!user || !currentTeacher) return true;
 
     const teacherId = user.uid;
@@ -115,7 +109,6 @@ function saveData() {
       updatedAt: new Date().toISOString()
     };
 
-    // Queue saves to prevent rapid changes from overwriting each other.
     cloudSaveQueue = cloudSaveQueue
       .catch(() => {})
       .then(async () => {
@@ -151,7 +144,6 @@ function saveData() {
 
 function makeId(prefix) {
   const randomPart = Math.random().toString(36).slice(2, 9);
-
   return `${prefix}_${Date.now().toString(36)}_${randomPart}`;
 }
 
@@ -251,7 +243,6 @@ function createClassForTeacher(
   };
 
   appData.classes.push(newClass);
-
   return newClass;
 }
 
@@ -265,10 +256,7 @@ function importStarterData(teacherId) {
       localStorage.getItem(LEGACY_STORAGE_KEY) || "null"
     );
   } catch (error) {
-    console.warn(
-      "The older AttendEase data could not be read.",
-      error
-    );
+    console.warn("The older AttendEase data could not be read.", error);
   }
 
   const starterClass = createClassForTeacher(
@@ -294,7 +282,6 @@ function importStarterData(teacherId) {
     }
   });
 
-  // Move old attendance records into the new format.
   if (
     legacy?.records &&
     typeof legacy.records === "object"
@@ -352,9 +339,7 @@ function getSelectedSection() {
 function ensureSelection() {
   const classes = getTeacherClasses();
 
-  if (
-    !classes.some(item => item.id === selectedClassId)
-  ) {
+  if (!classes.some(item => item.id === selectedClassId)) {
     selectedClassId = classes.length
       ? classes[0].id
       : null;
@@ -398,19 +383,12 @@ function setAuthMode(mode) {
   $("loginForm").hidden = !isLogin;
   $("registerForm").hidden = isLogin;
 
-  $("showLoginBtn").classList.toggle(
-    "active",
-    isLogin
-  );
+  $("showLoginBtn").classList.toggle("active", isLogin);
+  $("showRegisterBtn").classList.toggle("active", !isLogin);
 
-  $("showRegisterBtn").classList.toggle(
-    "active",
-    !isLogin
-  );
-
-$("authView").querySelector(".eyebrow").textContent = isLogin
-  ? "Teacher sign in"
-  : "Create your teacher account";
+  $("authView").querySelector(".eyebrow").textContent = isLogin
+    ? "Teacher sign in"
+    : "Create your teacher account";
 
   $("authIntro").textContent = isLogin
     ? "Sign in to access your classes and attendance from any device."
@@ -427,7 +405,6 @@ function showAuth(message = "") {
   $("authView").hidden = false;
 
   setAuthMode("login");
-
   $("authMessage").textContent = message;
 }
 
@@ -448,14 +425,12 @@ function showApp() {
   );
 
   $("attendanceDate").value = localDate(today);
-
   $("teacherLabel").textContent = currentTeacher.name;
 
   $("welcomeHeading").textContent =
     `Good day, ${currentTeacher.name}!`;
 
   ensureSelection();
-
   renderAll();
 }
 
@@ -608,6 +583,22 @@ function renderStudents() {
         <td>
           ${escapeHTML(student.name)}
           <span class="student-id">${escapeHTML(student.id)}</span>
+
+          <div class="manage-actions student-actions">
+            <button
+              class="small-button"
+              type="button"
+              data-student-action="edit"
+              data-student-id="${escapeHTML(student.id)}"
+            >Edit</button>
+
+            <button
+              class="small-button danger"
+              type="button"
+              data-student-action="delete"
+              data-student-id="${escapeHTML(student.id)}"
+            >Delete</button>
+          </div>
         </td>
 
         <td>
@@ -663,9 +654,7 @@ function renderStudents() {
 
   const counts = students.reduce((acc, student) => {
     const status = getRecord(student.id).status;
-
     acc[status] = (acc[status] || 0) + 1;
-
     return acc;
   }, {});
 
@@ -682,11 +671,228 @@ function renderStudents() {
       : "Create a class and section before taking attendance.";
 }
 
+
+function exportAttendanceCSV() {
+  const classItem = getSelectedClass();
+  const section = getSelectedSection();
+  const selectedDate = $("historyDateSelect").value;
+
+  if (!classItem || !section || !selectedDate) {
+    alert("No attendance records are available to export.");
+    return;
+  }
+
+  const records = Object.entries(appData.records)
+    .map(([key, record]) => ({
+      parts: key.split("|"),
+      record
+    }))
+    .filter(item =>
+      item.parts[0] === selectedDate &&
+      item.parts[1] === classItem.id &&
+      item.parts[2] === section.id
+    );
+
+  if (!records.length) {
+    alert("There are no attendance records for this date.");
+    return;
+  }
+
+  function csvCell(value) {
+    let text = String(value ?? "");
+
+    // Help prevent spreadsheet formula execution.
+    if (/^[=+\-@\t\r]/.test(text)) {
+      text = "'" + text;
+    }
+
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  const rows = [
+    [
+      "Date",
+      "Class",
+      "Section",
+      "Student Name",
+      "Student ID",
+      "Attendance Status",
+      "Reason",
+      "Notes"
+    ]
+  ];
+
+  records.forEach(item => {
+    const studentId = item.parts[3];
+
+    const student = section.students.find(
+      person => person.id === studentId
+    );
+
+    rows.push([
+      selectedDate,
+      classItem.name,
+      section.name,
+      student ? student.name : "Removed student",
+      studentId,
+      item.record.status || "Unmarked",
+      item.record.reason || "",
+      item.record.notes || ""
+    ]);
+  });
+
+  const csvContent =
+    "\uFEFF" +
+    rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+
+  const blob = new Blob(
+    [csvContent],
+    { type: "text/csv;charset=utf-8;" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download =
+    `AttendEase_${selectedDate}_${classItem.name.replace(/[^a-z0-9]/gi, "_")}.csv`;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+
+  alert("Attendance report exported successfully!");
+}
+
+
+function renderHistory() {
+  const section = getSelectedSection();
+  const classItem = getSelectedClass();
+
+  const dateSelect = $("historyDateSelect");
+  const historyRows = $("historyRows");
+  const emptyState = $("historyEmptyState");
+
+  if (!section || !classItem) {
+    dateSelect.innerHTML = '<option value="">No records available</option>';
+    historyRows.innerHTML = "";
+    emptyState.hidden = false;
+    emptyState.textContent = "Choose a class and section to view attendance history.";
+
+    $("historyTotalCount").textContent = 0;
+    $("historyPresentCount").textContent = 0;
+    $("historyAbsentCount").textContent = 0;
+    $("historyLateCount").textContent = 0;
+    return;
+  }
+
+  const dates = [
+    ...new Set(
+      Object.keys(appData.records)
+        .map(key => key.split("|"))
+        .filter(parts =>
+          parts[1] === classItem.id &&
+          parts[2] === section.id
+        )
+        .map(parts => parts[0])
+        .filter(Boolean)
+    )
+  ].sort((a, b) => b.localeCompare(a));
+
+  if (!dates.length) {
+    dateSelect.innerHTML = '<option value="">No records available</option>';
+    historyRows.innerHTML = "";
+    emptyState.hidden = false;
+    emptyState.textContent = "No attendance history is available for this class and section yet.";
+
+    $("historyTotalCount").textContent = 0;
+    $("historyPresentCount").textContent = 0;
+    $("historyAbsentCount").textContent = 0;
+    $("historyLateCount").textContent = 0;
+    return;
+  }
+
+  const previousDate = dateSelect.value;
+  const selectedDate = dates.includes(previousDate)
+    ? previousDate
+    : dates[0];
+
+  dateSelect.innerHTML = dates.map(date =>
+    `<option value="${escapeHTML(date)}" ${
+      date === selectedDate ? "selected" : ""
+    }>${escapeHTML(date)}</option>`
+  ).join("");
+
+  const historyRecords = Object.entries(appData.records)
+    .map(([key, record]) => ({
+      parts: key.split("|"),
+      record
+    }))
+    .filter(item =>
+      item.parts[0] === selectedDate &&
+      item.parts[1] === classItem.id &&
+      item.parts[2] === section.id
+    );
+
+  const counts = {
+    Present: 0,
+    Absent: 0,
+    Late: 0,
+    Unmarked: 0
+  };
+
+  historyRecords.forEach(item => {
+    const status = item.record.status || "Unmarked";
+    counts[status] = (counts[status] || 0) + 1;
+  });
+
+  $("historyTotalCount").textContent = historyRecords.length;
+  $("historyPresentCount").textContent = counts.Present;
+  $("historyAbsentCount").textContent = counts.Absent;
+  $("historyLateCount").textContent = counts.Late;
+
+  historyRows.innerHTML = historyRecords.map(item => {
+    const studentId = item.parts[3];
+
+    const student = section.students.find(
+      person => person.id === studentId
+    );
+
+    const studentName = student
+      ? student.name
+      : "Removed student";
+
+    const record = item.record;
+    const reason = [record.reason, record.notes]
+      .filter(Boolean)
+      .join(" — ");
+
+    return `
+      <tr>
+        <td>${escapeHTML(studentName)}</td>
+        <td>${escapeHTML(studentId)}</td>
+        <td>${escapeHTML(record.status || "Unmarked")}</td>
+        <td>${escapeHTML(reason || "—")}</td>
+      </tr>
+    `;
+  }).join("");
+
+  emptyState.hidden = historyRecords.length > 0;
+
+  if (!historyRecords.length) {
+    emptyState.textContent = "No attendance records were found for this date.";
+  }
+}
+
 function renderAll() {
   renderClassSelectors();
   renderClassManager();
   renderStudents();
+  renderHistory();
 }
+
 
 function openReasonDialog(studentId) {
   const section = getSelectedSection();
@@ -724,6 +930,107 @@ function removeRecordsForClass(classId, sectionId = null) {
       delete appData.records[key];
     }
   });
+}
+
+// EDIT STUDENT
+function editStudent(studentId) {
+  const section = getSelectedSection();
+  const classItem = getSelectedClass();
+
+  if (!section || !classItem) return;
+
+  const student = section.students.find(
+    item => item.id === studentId
+  );
+
+  if (!student) return;
+
+  const newName = prompt(
+    "Enter the student's new name:",
+    student.name
+  );
+
+  if (newName === null || !newName.trim()) return;
+
+  const newId = prompt(
+    "Enter the student's new ID:",
+    student.id
+  );
+
+  if (newId === null || !newId.trim()) return;
+
+  const cleanName = newName.trim();
+  const cleanId = newId.trim();
+
+  const duplicate = section.students.some(
+    item =>
+      item.id.toLowerCase() === cleanId.toLowerCase() &&
+      item.id !== student.id
+  );
+
+  if (duplicate) {
+    alert("That student ID already exists in this section.");
+    return;
+  }
+
+  const oldId = student.id;
+
+  student.name = cleanName;
+  student.id = cleanId;
+
+  if (oldId !== cleanId) {
+    const updatedRecords = {};
+
+    Object.entries(appData.records).forEach(([key, record]) => {
+      const parts = key.split("|");
+
+      if (
+        parts[1] === classItem.id &&
+        parts[2] === section.id &&
+        parts[3] === oldId
+      ) {
+        parts[3] = cleanId;
+        updatedRecords[parts.join("|")] = record;
+      } else {
+        updatedRecords[key] = record;
+      }
+    });
+
+    appData.records = updatedRecords;
+  }
+
+  saveData();
+  renderAll();
+
+  alert("Student information updated successfully!");
+}
+
+// DELETE STUDENT
+function deleteStudent(studentId) {
+  const section = getSelectedSection();
+
+  if (!section) return;
+
+  const student = section.students.find(
+    item => item.id === studentId
+  );
+
+  if (!student) return;
+
+  const confirmed = confirm(
+    `Are you sure you want to remove ${student.name} from this section? Their existing attendance records will be preserved.`
+  );
+
+  if (!confirmed) return;
+
+  section.students = section.students.filter(
+    item => item.id !== studentId
+  );
+
+  saveData();
+  renderAll();
+
+  alert("Student removed successfully.");
 }
 
 // AUTHENTICATION EVENTS
@@ -767,10 +1074,8 @@ $("registerForm").addEventListener("submit", async event => {
   }
 
   $("registerBtn").disabled = true;
-
   message.textContent = "Creating your Firebase account...";
 
-  // Stop the automatic Firebase listener while creating the account.
   isCreatingAccount = true;
 
   try {
@@ -788,17 +1093,12 @@ $("registerForm").addEventListener("submit", async event => {
       email: user.email
     };
 
-    // Create the teacher's first class or import older data.
     if (!appData.legacyImported) {
       importStarterData(user.uid);
     } else {
-      createClassForTeacher(
-        user.uid,
-        "My First Class"
-      );
+      createClassForTeacher(user.uid, "My First Class");
     }
 
-    // Prepare only this teacher's information for Firebase.
     const teacherClasses = appData.classes.filter(
       item => item.teacherId === user.uid
     );
@@ -822,13 +1122,11 @@ $("registerForm").addEventListener("submit", async event => {
       updatedAt: new Date().toISOString()
     };
 
-    // IMPORTANT: Save the teacher's information to Firestore.
     await setDoc(
       doc(db, "teachers", user.uid, "appData", "state"),
       cloudData
     );
 
-    // Save a local backup after successful cloud registration.
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(appData)
@@ -838,7 +1136,6 @@ $("registerForm").addEventListener("submit", async event => {
     selectedSectionId = null;
 
     showApp();
-
     $("registerForm").reset();
 
   } catch (error) {
@@ -877,7 +1174,6 @@ $("loginForm").addEventListener("submit", async event => {
   const message = $("authMessage");
 
   message.classList.remove("success");
-
   $("loginBtn").disabled = true;
 
   message.textContent = "Signing in to Firebase...";
@@ -914,7 +1210,6 @@ $("loginForm").addEventListener("submit", async event => {
     );
 
     const cloudClasses = cloudData.classes || [];
-
     appData.classes.push(...cloudClasses);
 
     const cloudClassIds = new Set(
@@ -947,7 +1242,6 @@ $("loginForm").addEventListener("submit", async event => {
     selectedSectionId = null;
 
     showApp();
-
     $("loginForm").reset();
 
   } catch (error) {
@@ -985,7 +1279,6 @@ $("logoutBtn").addEventListener("click", async () => {
 
   } catch (error) {
     console.error("Logout error:", error);
-
     alert("Could not log out. Please try again.");
   }
 });
@@ -1002,7 +1295,6 @@ $("classSelect").addEventListener("change", () => {
 
 $("sectionSelect").addEventListener("change", () => {
   selectedSectionId = $("sectionSelect").value || null;
-
   renderAll();
 });
 
@@ -1040,7 +1332,6 @@ $("classForm").addEventListener("submit", event => {
     alert(
       "You already have a class with that name. Please choose another name."
     );
-
     return;
   }
 
@@ -1055,9 +1346,7 @@ $("classForm").addEventListener("submit", event => {
   selectedSectionId = newClass.sections[0].id;
 
   saveData();
-
   $("classForm").reset();
-
   renderAll();
 });
 
@@ -1082,7 +1371,6 @@ $("sectionForm").addEventListener("submit", event => {
     alert(
       "That section already exists in this class. Please use another name."
     );
-
     return;
   }
 
@@ -1093,13 +1381,10 @@ $("sectionForm").addEventListener("submit", event => {
   };
 
   selectedClass.sections.push(section);
-
   selectedSectionId = section.id;
 
   saveData();
-
   $("sectionForm").reset();
-
   renderAll();
 });
 
@@ -1194,7 +1479,6 @@ $("classList").addEventListener("click", event => {
       alert(
         "Another section in this class already uses that name."
       );
-
       return;
     }
 
@@ -1235,13 +1519,11 @@ $("classList").addEventListener("click", event => {
   }
 
   saveData();
-
   ensureSelection();
-
   renderAll();
 });
 
-// ATTENDANCE AND STUDENT EVENTS
+// ATTENDANCE EVENTS
 
 $("studentRows").addEventListener("change", event => {
   const studentId = event.target.dataset.statusId;
@@ -1271,15 +1553,37 @@ $("studentRows").addEventListener("change", event => {
   }
 
   saveData();
-
   renderStudents();
 });
 
-$("studentRows").addEventListener("click", event => {
-  const studentId = event.target.dataset.reasonId;
+// STUDENT EDIT, DELETE, AND REASON BUTTONS
 
-  if (studentId) {
-    openReasonDialog(studentId);
+$("studentRows").addEventListener("click", event => {
+  const actionButton = event.target.closest(
+    "button[data-student-action]"
+  );
+
+  if (actionButton) {
+    const studentId = actionButton.dataset.studentId;
+    const action = actionButton.dataset.studentAction;
+
+    if (action === "edit") {
+      editStudent(studentId);
+    }
+
+    if (action === "delete") {
+      deleteStudent(studentId);
+    }
+
+    return;
+  }
+
+  const reasonButton = event.target.closest(
+    "button[data-reason-id]"
+  );
+
+  if (reasonButton) {
+    openReasonDialog(reasonButton.dataset.reasonId);
   }
 });
 
@@ -1309,7 +1613,6 @@ $("saveReasonBtn").addEventListener("click", event => {
   appData.records[key] = record;
 
   saveData();
-
   $("reasonDialog").close();
 
   activeReasonStudent = null;
@@ -1322,6 +1625,16 @@ $("saveReasonBtn").addEventListener("click", event => {
 $("attendanceDate").addEventListener(
   "change",
   renderStudents
+);
+
+$("historyDateSelect").addEventListener(
+  "change",
+  renderHistory
+);
+
+$("historyExportBtn").addEventListener(
+  "click",
+  exportAttendanceCSV
 );
 
 $("searchInput").addEventListener(
@@ -1385,13 +1698,11 @@ $("addStudentBtn").addEventListener("click", () => {
   if (!getSelectedSection()) return;
 
   $("addStudentPanel").hidden = false;
-
   $("newStudentId").focus();
 });
 
 $("cancelAddBtn").addEventListener("click", () => {
   $("addStudentPanel").hidden = true;
-
   $("studentForm").reset();
 });
 
@@ -1406,12 +1717,13 @@ $("studentForm").addEventListener("submit", event => {
     alert(
       "Create a class and section before adding students."
     );
-
     return;
   }
 
   const id = $("newStudentId").value.trim();
   const name = $("newStudentName").value.trim();
+
+  if (!id || !name) return;
 
   if (
     section.students.some(
@@ -1421,7 +1733,6 @@ $("studentForm").addEventListener("submit", event => {
     alert(
       "That student ID already exists in this section. Please use a different ID."
     );
-
     return;
   }
 
@@ -1433,7 +1744,6 @@ $("studentForm").addEventListener("submit", event => {
   saveData();
 
   $("studentForm").reset();
-
   $("addStudentPanel").hidden = true;
 
   renderAll();
@@ -1444,8 +1754,6 @@ $("studentForm").addEventListener("submit", event => {
 function startApp() {
   onAuthStateChanged(auth, async user => {
     if (user) {
-
-      // Registration handles its own first-time data saving.
       if (isCreatingAccount) return;
 
       try {
@@ -1476,7 +1784,6 @@ function startApp() {
         );
 
         const cloudClasses = cloudData.classes || [];
-
         appData.classes.push(...cloudClasses);
 
         const cloudClassIds = new Set(
@@ -1525,14 +1832,11 @@ function startApp() {
 
     } else {
       currentTeacher = null;
-
       localStorage.removeItem(SESSION_KEY);
-
       showAuth();
     }
   });
 
-  // Keep offline support enabled.
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./service-worker.js")

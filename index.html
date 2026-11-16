@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,14 +11,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <!-- LOGIN AND REGISTER -->
   <section class="auth-shell" id="authView">
     <div class="auth-card">
       <a class="brand auth-brand" href="#">
         <span class="brand-mark">A</span>
         <span>AttendEase<small>Teacher attendance</small></span>
       </a>
+
       <p class="eyebrow">WELCOME TO ATTENDEASE</p>
-      <p class="muted auth-intro" id="authIntro">Sign in to manage your classes and attendance on this device.</p>
+      <h1>Welcome back!</h1>
+      <p class="muted auth-intro" id="authIntro">
+        Sign in to manage your classes and attendance on this device.
+      </p>
 
       <div class="auth-tabs" role="tablist" aria-label="Account options">
         <button type="button" class="auth-tab active" id="showLoginBtn">Log in</button>
@@ -49,124 +56,402 @@
         </label>
         <button type="submit" class="button button-primary button-full" id="registerBtn">Create teacher account</button>
       </form>
+
       <p class="form-message" id="authMessage" role="status" aria-live="polite"></p>
     </div>
   </section>
 
+  <!-- MAIN APPLICATION -->
   <div id="appView" hidden>
-    <header class="topbar">
-      <a class="brand" href="#">
-        <span class="brand-mark">A</span>
-        <span>AttendEase<small>Teacher attendance</small></span>
-      </a>
-      <div class="topbar-right">
-        <span class="header-date" id="todayLabel"></span>
-        <span class="teacher-chip" id="teacherLabel"></span>
-        <button class="button button-outline logout-button" id="logoutBtn" type="button">Log out</button>
+    <div class="app-layout">
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <a class="brand sidebar-brand" href="#dashboardSection">
+          <span class="brand-mark">A</span>
+          <span>AttendEase<small>Teacher attendance</small></span>
+        </a>
+
+        <div class="sidebar-label">MAIN MENU</div>
+
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <a class="nav-link active" href="#dashboardSection">
+            <span class="nav-icon">⌂</span><span>Dashboard</span>
+          </a>
+          <a class="nav-link" href="#attendanceSection">
+            <span class="nav-icon">✓</span><span>Attendance</span>
+          </a>
+          <a class="nav-link" href="#classesSection">
+            <span class="nav-icon">▤</span><span>My Classes</span>
+          </a>
+          <a class="nav-link" href="#historySection">
+            <span class="nav-icon">◷</span><span>Attendance History</span>
+          </a>
+        </nav>
+
+        <button class="button button-outline sidebar-logout" id="logoutBtn" type="button">
+          ⇥ Log out
+        </button>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <div class="main-area">
+
+        <header class="topbar">
+          <div class="mobile-brand">
+            <span class="brand-mark">A</span>
+            <strong>AttendEase</strong>
+          </div>
+          <div class="topbar-info">
+            <span class="header-date" id="todayLabel"></span>
+            <div class="teacher-profile">
+              <div class="profile-avatar">T</div>
+              <span class="teacher-chip" id="teacherLabel"></span>
+            </div>
+          </div>
+        </header>
+
+        <main class="container">
+
+          <!-- DASHBOARD -->
+          <section id="dashboardSection" class="dashboard-section">
+            <section class="welcome">
+              <div>
+                <p class="eyebrow">YOUR DASHBOARD</p>
+                <h1 id="welcomeHeading">Good day, Teacher!</h1>
+                <p class="muted">
+                  Welcome to AttendEase. Keep track of your students' attendance in one place.
+                </p>
+              </div>
+              <label class="date-control">
+                Attendance date
+                <input type="date" id="attendanceDate">
+              </label>
+            </section>
+
+            <section class="class-toolbar panel" aria-label="Choose a class and section">
+              <div class="class-toolbar-heading">
+                <div>
+                  <p class="eyebrow">CURRENT CLASS</p>
+                  <h2>Select your class</h2>
+                </div>
+              </div>
+
+              <div class="class-pickers">
+                <label>Class
+                  <select id="classSelect" aria-label="Select class"></select>
+                </label>
+                <label>Section
+                  <select id="sectionSelect" aria-label="Select section"></select>
+                </label>
+              </div>
+
+              <button class="button button-outline" id="manageClassesBtn" type="button">
+                + Manage classes
+              </button>
+            </section>
+
+            <section class="summary-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">QUICK OVERVIEW</p>
+                  <h2>Attendance summary</h2>
+                </div>
+              </div>
+
+              <section class="stats" aria-label="Attendance summary">
+                <article class="stat-card total-card">
+                  <div class="stat-icon blue">♙</div>
+                  <div>
+                    <p>Total students</p>
+                    <strong id="totalCount">0</strong>
+                    <span class="stat-caption">Enrolled students</span>
+                  </div>
+                </article>
+
+                <article class="stat-card present-card">
+                  <div class="stat-icon green">✓</div>
+                  <div>
+                    <p>Present</p>
+                    <strong id="presentCount">0</strong>
+                    <span class="stat-caption">Students present</span>
+                  </div>
+                </article>
+
+                <article class="stat-card absent-card">
+                  <div class="stat-icon red">!</div>
+                  <div>
+                    <p>Absent</p>
+                    <strong id="absentCount">0</strong>
+                    <span class="stat-caption">Students absent</span>
+                  </div>
+                </article>
+
+                <article class="stat-card late-card">
+                  <div class="stat-icon orange">◷</div>
+                  <div>
+                    <p>Late</p>
+                    <strong id="lateCount">0</strong>
+                    <span class="stat-caption">Students late</span>
+                  </div>
+                </article>
+              </section>
+            </section>
+          </section>
+
+          <!-- MY CLASSES -->
+          <section id="classesSection" class="content-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">CLASS MANAGEMENT</p>
+                <h2>My Classes</h2>
+                <p class="muted">Organize your classes and sections in one place.</p>
+              </div>
+
+              <button class="button button-primary" id="manageClassesBtnTop" type="button"
+                onclick="document.getElementById('manageClassesBtn').click()">
+                + Manage classes
+              </button>
+            </div>
+
+            <section class="panel manager-panel" id="classManagerPanel" hidden>
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">CLASS SETUP</p>
+                  <h2>Manage classes and sections</h2>
+                  <p class="muted">Create a class first, then add sections under it.</p>
+                </div>
+                <button class="button button-outline" id="closeManagerBtn" type="button">Close</button>
+              </div>
+
+              <form id="classForm" class="manager-form class-form">
+                <label>Class name
+                  <input id="newClassName" maxlength="70" required placeholder="e.g. Grade 11 - ICT">
+                </label>
+                <label>Subject (optional)
+                  <input id="newClassSubject" maxlength="70" placeholder="e.g. Empowerment Technologies">
+                </label>
+                <label>Grade / year (optional)
+                  <input id="newClassLevel" maxlength="40" placeholder="e.g. Grade 11">
+                </label>
+                <button class="button button-primary" type="submit">+ Add class</button>
+              </form>
+
+              <form id="sectionForm" class="manager-form section-form">
+                <label>Add a section to the selected class
+                  <input id="newSectionName" maxlength="60" required placeholder="e.g. Section A">
+                </label>
+                <button class="button button-primary" type="submit" id="addSectionBtn">
+                  + Add section
+                </button>
+              </form>
+
+              <div class="manager-list-heading">
+                <h3>Your classes</h3>
+                <span class="muted">You can rename or remove a class or section.</span>
+              </div>
+              <div id="classList" class="class-list"></div>
+            </section>
+          </section>
+
+          <!-- ATTENDANCE -->
+          <section id="attendanceSection" class="content-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">STUDENT RECORDS</p>
+                <h2>Class attendance</h2>
+                <p class="muted" id="attendanceContext">
+                  Choose a status for every student.
+                </p>
+              </div>
+              <button class="button button-primary" id="addStudentBtn" type="button">
+                + Add student
+              </button>
+            </div>
+
+            <section class="panel attendance-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Student attendance list</h2>
+                  <p class="muted">Search students and update their attendance status.</p>
+                </div>
+              </div>
+
+              <!-- SEARCH AND FILTER -->
+              <div class="toolbar">
+                <input
+                  type="search"
+                  id="searchInput"
+                  placeholder="Search students..."
+                  aria-label="Search students"
+                >
+
+                <select id="statusFilter" aria-label="Filter by attendance status">
+                  <option value="all">All statuses</option>
+                  <option value="Present">Present</option>
+                  <option value="Absent">Absent</option>
+                  <option value="Late">Late</option>
+                </select>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Attendance status</th>
+                      <th>Reason / notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="studentRows"></tbody>
+                </table>
+                <div class="empty-state" id="emptyState" hidden>
+                  No students found. Add a student to get started.
+                </div>
+              </div>
+
+              <div class="panel-footer">
+                <span class="muted" id="savedMessage">
+                  Changes are saved on this device.
+                </span>
+                <button class="button button-primary" id="saveBtn" type="button">
+                  Save attendance
+                </button>
+              </div>
+            </section>
+
+            <!-- ADD STUDENT FORM -->
+            <section class="panel add-panel" id="addStudentPanel" hidden>
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">NEW STUDENT</p>
+                  <h2>Add a student</h2>
+                  <p class="muted">Add the student to the selected class section.</p>
+                </div>
+              </div>
+
+              <form id="studentForm" class="student-form">
+                <label>Student ID
+                  <input id="newStudentId" required maxlength="30" placeholder="e.g. 2026-001">
+                </label>
+                <label>Full name
+                  <input id="newStudentName" required maxlength="80" placeholder="e.g. Alex Dela Cruz">
+                </label>
+                <div class="form-actions">
+                  <button type="button" class="button button-outline" id="cancelAddBtn">
+                    Cancel
+                  </button>
+                  <button class="button button-primary" type="submit">
+                    Add student
+                  </button>
+                </div>
+              </form>
+            </section>
+          </section>
+
+          <!-- ATTENDANCE HISTORY -->
+          <section id="historySection" class="content-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">PREVIOUS RECORDS</p>
+                <h2>Attendance History</h2>
+                <p class="muted">Review attendance records from previous dates.</p>
+              </div>
+            </div>
+
+            <section class="panel attendance-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Attendance records</h2>
+                  <p class="muted">
+                    Choose a date to view the saved attendance for your selected class and section.
+                  </p>
+                </div>
+              </div>
+
+              <!-- HISTORY DATE AND EXPORT -->
+              <div class="toolbar">
+                <label>Recorded date
+                  <select id="historyDateSelect" aria-label="Choose an attendance history date">
+                    <option value="">No records available</option>
+                  </select>
+                </label>
+
+                <button class="button button-primary" id="historyExportBtn" type="button">
+                  ↓ Export CSV
+                </button>
+              </div>
+
+              <section class="stats history-stats">
+                <article class="stat-card total-card">
+                  <div>
+                    <p>Recorded students</p>
+                    <strong id="historyTotalCount">0</strong>
+                  </div>
+                </article>
+                <article class="stat-card present-card">
+                  <div>
+                    <p>Present</p>
+                    <strong id="historyPresentCount">0</strong>
+                  </div>
+                </article>
+                <article class="stat-card absent-card">
+                  <div>
+                    <p>Absent</p>
+                    <strong id="historyAbsentCount">0</strong>
+                  </div>
+                </article>
+                <article class="stat-card late-card">
+                  <div>
+                    <p>Late</p>
+                    <strong id="historyLateCount">0</strong>
+                  </div>
+                </article>
+              </section>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Student ID</th>
+                      <th>Status</th>
+                      <th>Reason / notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyRows"></tbody>
+                </table>
+                <div class="empty-state" id="historyEmptyState">
+                  No attendance history is available for this class and section yet.
+                </div>
+              </div>
+            </section>
+          </section>
+
+        </main>
+
+        <footer class="app-footer">
+          <span>AttendEase</span>
+          <span>Making attendance easier, one class at a time.</span>
+        </footer>
+
       </div>
-    </header>
-
-    <main class="container">
-      <section class="welcome">
-        <div>
-          <p class="eyebrow">ATTENDANCE OVERVIEW</p>
-          <h1 id="welcomeHeading">Good day, Teacher!</h1>
-          <p class="muted">Keep track of your students' attendance in one place.</p>
-        </div>
-        <label class="date-control">Attendance date
-          <input type="date" id="attendanceDate">
-        </label>
-      </section>
-
-      <section class="class-toolbar panel" aria-label="Choose a class and section">
-        <div class="class-pickers">
-          <label>Class
-            <select id="classSelect" aria-label="Select class"></select>
-          </label>
-          <label>Section
-            <select id="sectionSelect" aria-label="Select section"></select>
-          </label>
-        </div>
-        <button class="button button-outline" id="manageClassesBtn" type="button">Manage classes &amp; sections</button>
-      </section>
-
-      <section class="stats" aria-label="Attendance summary">
-        <article class="stat-card"><span class="stat-icon blue">👥</span><div><p>Total students</p><strong id="totalCount">0</strong></div></article>
-        <article class="stat-card"><span class="stat-icon green">✓</span><div><p>Present</p><strong id="presentCount">0</strong></div></article>
-        <article class="stat-card"><span class="stat-icon red">!</span><div><p>Absent</p><strong id="absentCount">0</strong></div></article>
-        <article class="stat-card"><span class="stat-icon orange">◷</span><div><p>Late</p><strong id="lateCount">0</strong></div></article>
-      </section>
-
-      <section class="panel manager-panel" id="classManagerPanel" hidden>
-        <div class="panel-heading">
-          <div><p class="eyebrow">CLASS SETUP</p><h2>Manage classes and sections</h2><p class="muted">Create a class first, then add sections under it.</p></div>
-          <button class="button button-outline" id="closeManagerBtn" type="button">Close</button>
-        </div>
-        <form id="classForm" class="manager-form class-form">
-          <label>Class name
-            <input id="newClassName" maxlength="70" required placeholder="e.g. Grade 11 - ICT">
-          </label>
-          <label>Subject (optional)
-            <input id="newClassSubject" maxlength="70" placeholder="e.g. Empowerment Technologies">
-          </label>
-          <label>Grade / year (optional)
-            <input id="newClassLevel" maxlength="40" placeholder="e.g. Grade 11">
-          </label>
-          <button class="button button-primary" type="submit">＋ Add class</button>
-        </form>
-        <form id="sectionForm" class="manager-form section-form">
-          <label>Add a section to the selected class
-            <input id="newSectionName" maxlength="60" required placeholder="e.g. Section A">
-          </label>
-          <button class="button button-primary" type="submit" id="addSectionBtn">＋ Add section</button>
-        </form>
-        <div class="manager-list-heading"><h3>Your classes</h3><span class="muted">You can rename or remove a class or section.</span></div>
-        <div id="classList" class="class-list"></div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-heading">
-          <div><h2>Class attendance</h2><p class="muted" id="attendanceContext">Choose a status for every student.</p></div>
-          <button class="button button-outline" id="addStudentBtn" type="button">＋ Add student</button>
-        </div>
-        <div class="toolbar">
-          <input type="search" id="searchInput" placeholder="Search student name or ID..." aria-label="Search students">
-          <select id="statusFilter" aria-label="Filter by status">
-            <option value="All">All statuses</option>
-            <option value="Present">Present</option>
-            <option value="Absent">Absent</option>
-            <option value="Late">Late</option>
-            <option value="Unmarked">Not marked</option>
-          </select>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Student</th><th>Attendance status</th><th>Reason / notes</th></tr></thead>
-            <tbody id="studentRows"></tbody>
-          </table>
-          <div class="empty-state" id="emptyState" hidden>No students found. Add a student to get started.</div>
-        </div>
-        <div class="panel-footer">
-          <span class="muted" id="savedMessage">Changes are saved on this device.</span>
-          <button class="button button-primary" id="saveBtn" type="button">Save attendance</button>
-        </div>
-      </section>
-
-      <section class="panel add-panel" id="addStudentPanel" hidden>
-        <div class="panel-heading"><div><h2>Add a student</h2><p class="muted">Add the student to the selected class section.</p></div></div>
-        <form id="studentForm" class="student-form">
-          <label>Student ID<input id="newStudentId" required maxlength="30" placeholder="e.g. 2026-001"></label>
-          <label>Full name<input id="newStudentName" required maxlength="80" placeholder="e.g. Alex Dela Cruz"></label>
-          <div class="form-actions"><button type="button" class="button button-outline" id="cancelAddBtn">Cancel</button><button class="button button-primary" type="submit">Add student</button></div>
-        </form>
-      </section>
-    </main>
+    </div>
   </div>
 
+  <!-- ATTENDANCE REASON DIALOG -->
   <dialog id="reasonDialog">
     <form method="dialog" id="reasonForm">
-      <div class="dialog-heading"><div><p class="eyebrow">ATTENDANCE DETAILS</p><h2 id="reasonTitle">Add a reason</h2></div><button class="icon-button" value="cancel" aria-label="Close">✕</button></div>
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">ATTENDANCE DETAILS</p>
+          <h2 id="reasonTitle">Add a reason</h2>
+        </div>
+        <button class="icon-button" value="cancel" aria-label="Close">✕</button>
+      </div>
+
       <p class="muted" id="reasonStudent"></p>
+
       <label>Reason
         <select id="reasonSelect">
           <option value="">Choose a reason</option>
@@ -179,12 +464,20 @@
           <option>Other</option>
         </select>
       </label>
+
       <label>Additional explanation (optional)
         <textarea id="reasonNotes" rows="3" maxlength="300" placeholder="Add a short note..."></textarea>
       </label>
-      <div class="form-actions"><button class="button button-outline" value="cancel">Cancel</button><button class="button button-primary" id="saveReasonBtn" value="save">Save reason</button></div>
+
+      <div class="form-actions">
+        <button class="button button-outline" value="cancel">Cancel</button>
+        <button class="button button-primary" id="saveReasonBtn" value="save">
+          Save reason
+        </button>
+      </div>
     </form>
   </dialog>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>
