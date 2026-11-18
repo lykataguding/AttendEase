@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1d4ed8">
-  <meta name="description" content="A simple attendance checker for teachers.">
-  <title>AttendEase | Teacher Attendance</title>
+  <meta name="description" content="A teacher attendance management system.">
+  <title>AttendEase | Attendance Management</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -17,14 +17,12 @@
     <div class="auth-card">
       <a class="brand auth-brand" href="#">
         <span class="brand-mark">A</span>
-        <span>AttendEase<small>Teacher attendance</small></span>
+        <span>AttendEase<small>Attendance Management</small></span>
       </a>
 
-      <p class="eyebrow">WELCOME TO ATTENDEASE</p>
-      <h1>Welcome back!</h1>
       <p class="muted auth-intro" id="authIntro">
-        Sign in to manage your classes and attendance on this device.
-      </p>
+  Sign in to access your classes and attendance records.
+</p>
 
       <div class="auth-tabs" role="tablist" aria-label="Account options">
         <button type="button" class="auth-tab active" id="showLoginBtn">Log in</button>
@@ -54,7 +52,7 @@
         <label>Confirm password
           <input type="password" id="confirmPassword" minlength="8" autocomplete="new-password" required placeholder="Enter the password again">
         </label>
-        <button type="submit" class="button button-primary button-full" id="registerBtn">Create teacher account</button>
+        <button type="submit" class="button button-primary button-full" id="registerBtn">Create account</button>
       </form>
 
       <p class="form-message" id="authMessage" role="status" aria-live="polite"></p>
@@ -69,7 +67,7 @@
       <aside class="sidebar">
         <a class="brand sidebar-brand" href="#dashboardSection">
           <span class="brand-mark">A</span>
-          <span>AttendEase<small>Teacher attendance</small></span>
+          <span>AttendEase<small>Attendance Management</small></span>
         </a>
 
         <div class="sidebar-label">MAIN MENU</div>
@@ -117,14 +115,14 @@
           <section id="dashboardSection" class="dashboard-section">
             <section class="welcome">
               <div>
-                <p class="eyebrow">YOUR DASHBOARD</p>
+                <p class="eyebrow">OVERVIEW</p>
                 <h1 id="welcomeHeading">Good day, Teacher!</h1>
                 <p class="muted">
-                  Welcome to AttendEase. Keep track of your students' attendance in one place.
+                  Manage your classes and monitor student attendance.
                 </p>
               </div>
               <label class="date-control">
-                Attendance date
+                Select date
                 <input type="date" id="attendanceDate">
               </label>
             </section>
@@ -132,8 +130,8 @@
             <section class="class-toolbar panel" aria-label="Choose a class and section">
               <div class="class-toolbar-heading">
                 <div>
-                  <p class="eyebrow">CURRENT CLASS</p>
-                  <h2>Select your class</h2>
+                  <p class="eyebrow">CLASS SELECTION</p>
+                  <h2>Choose a class and section</h2>
                 </div>
               </div>
 
@@ -154,8 +152,8 @@
             <section class="summary-section">
               <div class="section-heading">
                 <div>
-                  <p class="eyebrow">QUICK OVERVIEW</p>
-                  <h2>Attendance summary</h2>
+                  <p class="eyebrow">SUMMARY</p>
+                  <h2>Today's attendance</h2>
                 </div>
               </div>
 
@@ -165,7 +163,7 @@
                   <div>
                     <p>Total students</p>
                     <strong id="totalCount">0</strong>
-                    <span class="stat-caption">Enrolled students</span>
+                    <span class="stat-caption">Total enrolled</span>
                   </div>
                 </article>
 
@@ -174,7 +172,7 @@
                   <div>
                     <p>Present</p>
                     <strong id="presentCount">0</strong>
-                    <span class="stat-caption">Students present</span>
+                    <span class="stat-caption">Present today</span>
                   </div>
                 </article>
 
@@ -183,7 +181,7 @@
                   <div>
                     <p>Absent</p>
                     <strong id="absentCount">0</strong>
-                    <span class="stat-caption">Students absent</span>
+                    <span class="stat-caption">Absent today</span>
                   </div>
                 </article>
 
@@ -192,7 +190,7 @@
                   <div>
                     <p>Late</p>
                     <strong id="lateCount">0</strong>
-                    <span class="stat-caption">Students late</span>
+                    <span class="stat-caption">Late today</span>
                   </div>
                 </article>
               </section>
@@ -203,9 +201,9 @@
           <section id="classesSection" class="content-section">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">CLASS MANAGEMENT</p>
+                <p class="eyebrow">CLASS SETUP</p>
                 <h2>My Classes</h2>
-                <p class="muted">Organize your classes and sections in one place.</p>
+                <p class="muted">Manage your classes and sections.</p>
               </div>
 
               <button class="button button-primary" id="manageClassesBtnTop" type="button"
@@ -218,8 +216,8 @@
               <div class="panel-heading">
                 <div>
                   <p class="eyebrow">CLASS SETUP</p>
-                  <h2>Manage classes and sections</h2>
-                  <p class="muted">Create a class first, then add sections under it.</p>
+                  <h2>Class and section settings</h2>
+                  <p class="muted">Add a class, then create its sections.</p>
                 </div>
                 <button class="button button-outline" id="closeManagerBtn" type="button">Close</button>
               </div>
@@ -248,7 +246,7 @@
 
               <div class="manager-list-heading">
                 <h3>Your classes</h3>
-                <span class="muted">You can rename or remove a class or section.</span>
+                <span class="muted">Edit or remove classes and sections.</span>
               </div>
               <div id="classList" class="class-list"></div>
             </section>
@@ -258,10 +256,10 @@
           <section id="attendanceSection" class="content-section">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">STUDENT RECORDS</p>
-                <h2>Class attendance</h2>
+                <p class="eyebrow">ATTENDANCE</p>
+                <h2>Student attendance</h2>
                 <p class="muted" id="attendanceContext">
-                  Choose a status for every student.
+                  Mark each student's attendance.
                 </p>
               </div>
               <button class="button button-primary" id="addStudentBtn" type="button">
@@ -272,8 +270,8 @@
             <section class="panel attendance-panel">
               <div class="panel-heading">
                 <div>
-                  <h2>Student attendance list</h2>
-                  <p class="muted">Search students and update their attendance status.</p>
+                  <h2>Attendance list</h2>
+                  <p class="muted">Search students and update their status.</p>
                 </div>
               </div>
 
@@ -299,8 +297,8 @@
                   <thead>
                     <tr>
                       <th>Student</th>
-                      <th>Attendance status</th>
-                      <th>Reason / notes</th>
+                      <th>Status</th>
+                      <th>Notes</th>
                     </tr>
                   </thead>
                   <tbody id="studentRows"></tbody>
@@ -312,7 +310,7 @@
 
               <div class="panel-footer">
                 <span class="muted" id="savedMessage">
-                  Changes are saved on this device.
+                  Attendance changes are saved.
                 </span>
                 <button class="button button-primary" id="saveBtn" type="button">
                   Save attendance
@@ -326,7 +324,7 @@
                 <div>
                   <p class="eyebrow">NEW STUDENT</p>
                   <h2>Add a student</h2>
-                  <p class="muted">Add the student to the selected class section.</p>
+                  <p class="muted">Enter the student's information below.</p>
                 </div>
               </div>
 
@@ -353,25 +351,25 @@
           <section id="historySection" class="content-section">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">PREVIOUS RECORDS</p>
+                <p class="eyebrow">RECORDS</p>
                 <h2>Attendance History</h2>
-                <p class="muted">Review attendance records from previous dates.</p>
+                <p class="muted">View previously saved attendance.</p>
               </div>
             </div>
 
             <section class="panel attendance-panel">
               <div class="panel-heading">
                 <div>
-                  <h2>Attendance records</h2>
+                  <h2>Saved records</h2>
                   <p class="muted">
-                    Choose a date to view the saved attendance for your selected class and section.
+                    Select a date to view attendance records.
                   </p>
                 </div>
               </div>
 
               <!-- HISTORY DATE AND EXPORT -->
               <div class="toolbar">
-                <label>Recorded date
+                <label>Select date
                   <select id="historyDateSelect" aria-label="Choose an attendance history date">
                     <option value="">No records available</option>
                   </select>
@@ -385,7 +383,7 @@
               <section class="stats history-stats">
                 <article class="stat-card total-card">
                   <div>
-                    <p>Recorded students</p>
+                    <p>Total recorded</p>
                     <strong id="historyTotalCount">0</strong>
                   </div>
                 </article>
@@ -416,7 +414,7 @@
                       <th>Student</th>
                       <th>Student ID</th>
                       <th>Status</th>
-                      <th>Reason / notes</th>
+                      <th>Notes</th>
                     </tr>
                   </thead>
                   <tbody id="historyRows"></tbody>
@@ -432,7 +430,7 @@
 
         <footer class="app-footer">
           <span>AttendEase</span>
-          <span>Making attendance easier, one class at a time.</span>
+          <span>Simple and organized classroom attendance management.</span>
         </footer>
 
       </div>

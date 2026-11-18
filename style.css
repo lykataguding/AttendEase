@@ -1063,54 +1063,99 @@ textarea:focus-visible {
 ========================================= */
 
 @media (max-width: 720px) {
+
   .app-layout {
-    display: block;
+    display: block !important;
+    width: 100%;
   }
 
   .sidebar {
-    width: 100%;
-    min-width: 0;
-    min-height: auto;
-    height: auto;
-    position: relative;
-    padding: 13px 15px;
-    border-right: 0;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 8px !important;
+    overflow: visible !important;
+    background: #ffffff;
+    border-right: none;
     border-bottom: 1px solid var(--border);
+    z-index: 100;
   }
 
-  .sidebar-brand {
-    display: none;
-  }
-
+  .sidebar-brand,
   .sidebar-label,
   .sidebar-bottom {
-    display: none;
+    display: none !important;
   }
 
   .sidebar-nav {
-    display: flex;
-    gap: 7px;
-    overflow-x: auto;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    width: 100% !important;
+    height: auto !important;
+    gap: 3px;
+    overflow: visible !important;
   }
 
   .nav-link {
-    min-height: 40px;
-    padding: 0 12px;
-    white-space: nowrap;
-    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    height: auto;
+    padding: 4px 2px;
+    font-size: 9px;
+    line-height: 1.1;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: anywhere;
   }
 
   .nav-icon {
-    font-size: 16px;
+    width: auto;
+    font-size: 15px;
+    line-height: 1;
+    flex-shrink: 0;
   }
 
+  .sidebar-logout {
+    display: block !important;
+    width: 100% !important;
+    min-height: 36px !important;
+    margin: 7px 0 0 !important;
+    padding: 8px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* MAIN CONTENT */
+
   .main-area {
-    margin-left: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    margin: 0 !important;
   }
 
   .topbar {
-    height: 65px;
-    padding: 0 16px;
+    height: 60px;
+    min-height: 60px;
+    padding: 0 14px;
     justify-content: space-between;
   }
 
@@ -1164,10 +1209,7 @@ textarea:focus-visible {
     font-size: 25px;
   }
 
-  .date-control {
-    width: 100%;
-  }
-
+  .date-control,
   .date-control input {
     width: 100%;
   }
